@@ -12,7 +12,7 @@ public interface RedisService {
 
     public void setValues(String key, Object data, Duration duration) throws JsonProcessingException;
 
-    public String getValues(String key);
+    public <T> T getValues(String key, Class<T> resultClassType) throws JsonProcessingException;
 
     public void deleteValues(String key);
 

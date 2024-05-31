@@ -5,9 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.study.redis.domain.User;
 import org.study.redis.service.redis.RedisService;
 
@@ -29,9 +27,21 @@ public class RedisTestController {
 
         redisService.setValues("session1",
                 user,
-                Duration.of(30000, TimeUnit.MILLISECONDS.toChronoUnit()));
+                Duration.of(180000, TimeUnit.MILLISECONDS.toChronoUnit()));
 
         return new ResponseEntity(null, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/findUser")
+    public ResponseEntity findUser(@Nullable @RequestParam String userId) throws Exception {
+
+        User findUser = redisService.getValues(userId, User.class);
+
+        if(findUser != null) {
+            System.out.println(findUser.toString());
+        }
+
+        return new ResponseEntity(findUser, HttpStatus.OK);
     }
 
 }

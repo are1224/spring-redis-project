@@ -3,6 +3,7 @@ package org.study.redis.service.redis.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.asm.TypeReference;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -68,15 +69,17 @@ public class RedisServiceImpl implements RedisService {
      */
     @Transactional(readOnly = true)
     @Override
-    public String getValues(String key) {
+    public <T> T getValues(String key, Class<T> resultClassType) throws JsonProcessingException {
 
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
 
         if (values.get(key) == null) {
-            return "false";
+            return null;
         }
 
-        return (String) values.get(key);
+        String valueOfString = (String) values.get(key);
+
+        return objectMapper.readValue(valueOfString, resultClassType);
 
     }
 
