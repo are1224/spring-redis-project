@@ -1,0 +1,11 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  data:
+    redis:
+      host: 192.168.70.128
+      port: 6379
+
+server:
+  port: 9000
