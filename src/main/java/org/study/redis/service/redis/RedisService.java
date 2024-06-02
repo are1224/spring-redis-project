@@ -8,9 +8,9 @@ import java.time.Duration;
 
 public interface RedisService {
 
-    public void setValues(String key, Object data) throws JsonProcessingException;
+    public String setValues(Object data) throws JsonProcessingException;
 
-    public void setValues(String key, Object data, Duration duration) throws JsonProcessingException;
+    public String setValues(Object data, Duration duration) throws JsonProcessingException;
 
     public <T> T getValues(String key, Class<T> resultClassType) throws JsonProcessingException;
 

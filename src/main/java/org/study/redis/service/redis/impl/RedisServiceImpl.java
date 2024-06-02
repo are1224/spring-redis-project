@@ -3,68 +3,92 @@ package org.study.redis.service.redis.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.asm.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.study.redis.domain.User;
 import org.study.redis.service.redis.RedisService;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
+
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class RedisServiceImpl implements RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     private final ObjectMapper objectMapper;
 
+    private final String SESSION_KEY_PREFIX = "session";
+    private final long SESSION_EXPIRED_TIME = 180000;
+
 
     /**
      * key와 data를 Redis에 저장
      *
-     * @param key
      * @param data
      */
     @Override
-    public void setValues(String key, Object data) throws JsonProcessingException {
+    public String setValues(Object data) throws JsonProcessingException {
 
-        System.out.println("redis input - 시작");
+        log.info("redis input - 시작");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(SESSION_KEY_PREFIX);
+        sb.append("-");
+        sb.append(((User) data).getUserId());
+        sb.append("-");
+        sb.append(UUID.randomUUID().toString());
 
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
-        values.set(key, objectMapper.writeValueAsString(data));
+        values.set(sb.toString(), objectMapper.writeValueAsString(data), Duration.of(SESSION_EXPIRED_TIME, TimeUnit.MILLISECONDS.toChronoUnit()));
 
-        System.out.println("redis input - 종료");
+        log.info("redis input - 종료");
+
+        return sb.toString();
 
     }
 
     /**
      * key, value 저장과 동시에 유효 기간 설정
      *
-     * @param key
      * @param data
      * @param duration
      */
     @Override
-    public void setValues(String key, Object data, Duration duration) throws JsonProcessingException {
+    public String setValues(Object data, Duration duration) throws JsonProcessingException {
 
-        System.out.println("redis input - 시작");
+        log.info("redis input - 시작");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(SESSION_KEY_PREFIX);
+        sb.append("-");
+        sb.append(((User) data).getUserId());
+        sb.append("-");
+        sb.append(UUID.randomUUID().toString());
 
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
-        values.set(key, objectMapper.writeValueAsString(data), duration);
+        values.set(sb.toString(), objectMapper.writeValueAsString(data), duration);
 
-        System.out.println("redis input - 종료");
+        log.info("redis input - 종료");
+
+        return sb.toString();
         
     }
 
     /**
-     * key 를 이용해서 rdis 로 부터 값을 get
+     * key 를 이용해서 redis 로 부터 값을 get
      *
      * @param key
+     * @param resultClassType
      * @return
      */
     @Transactional(readOnly = true)
