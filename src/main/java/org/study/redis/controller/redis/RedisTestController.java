@@ -66,6 +66,9 @@ public class RedisTestController {
         return new ResponseEntity<User>(findUser, HttpStatus.OK);
     }
 
-
+    @GetMapping(value = "/loginView")
+    public String loginView() {
+        return "login";
+    }
 
 }
