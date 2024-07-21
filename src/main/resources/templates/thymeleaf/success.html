@@ -1,0 +1,26 @@
+<!-- login page -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>success</title>
+    <link rel="stylesheet" href="/templates/thymeleaf/css/mainStyle.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="container">
+        <h1> Success Page </h1>
+        <br/>
+    </div>
+</th:block>
+
+<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--<script th:inline="javascript">-->
+<!--    const username = [[${userId}]]; // 도저히 Thymeleaf 문법에 따라서 서버의 ModelAndView 에 저장한 속성값을 외부 자바스크립트에서는 가져올수 없어서 이런식으로 처리-->
+<!--</script>-->
+<!--<script th:inline="javascript" src="/templates/thymeleaf/script/chat.js"></script>-->
+</body>
+</html>

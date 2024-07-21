@@ -1,6 +1,7 @@
 package org.study.redis.service.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.study.redis.domain.User;
 
 import java.util.Map;
 
@@ -8,9 +9,9 @@ import java.time.Duration;
 
 public interface RedisService {
 
-    public String setValues(Object data) throws JsonProcessingException;
+    public String setValues(String sessionKey, User user) throws JsonProcessingException;
 
-    public String setValues(Object data, Duration duration) throws JsonProcessingException;
+    public String setValues(String sessionKey, User user, Duration duration) throws JsonProcessingException;
 
     public <T> T getValues(String key, Class<T> resultClassType) throws JsonProcessingException;
 

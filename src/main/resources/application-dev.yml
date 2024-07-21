@@ -11,6 +11,10 @@ spring:
     username: root
     password: strawberry0702
     driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    session:
+      cookie:
+        name: JSESSIONID
 
 server:
   port: 9000
