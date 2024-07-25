@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.study.redis.config.filter.CustomAuthenticationFilter;
 import org.study.redis.config.handler.CustomLoginFailureHandler;
 import org.study.redis.config.handler.CustomLoginSuccessHandler;
@@ -56,26 +57,30 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
+
         // authentication Manager 설정
-        AuthenticationManager authenticationManager = authenticationManager(
-                http.getSharedObject(AuthenticationManagerBuilder.class));
+        AuthenticationManager authenticationManager = authenticationManager(http);
 
         // 인증 (접근권한) 설정
         http.authorizeHttpRequests((authorizeRequests) ->
                 authorizeRequests.requestMatchers(HttpMethod.GET, "/redis/v1/find**")
                         .hasRole("USER")
                         .anyRequest()
-                        .authenticated());
+                        .permitAll());
 
         // 사이트 위변조 요청 방지
         http.csrf(AbstractHttpConfigurer::disable);
 
+        http.requestCache(request -> request.requestCache(requestCache));
+
         // 로그인 설정
         http.formLogin(form -> form.loginPage("/redis/v1/login")
-                        .loginProcessingUrl("/redis/v1/login-process")
-                        .defaultSuccessUrl("/redis/v1/login-success")
-                        //.successHandler(new CustomAuthenticationSuccessHandler("/main"))
-                        .failureUrl("/redis/v1/login-fail")
+                //.loginProcessingUrl("/redis/v1/login-process")
+                // .defaultSuccessUrl("/redis/v1/success")
+                //.successHandler(new CustomAuthenticationSuccessHandler("/main"))
+                // .failureUrl("/redis/v1/login-fail")
                 //.failureHandler(new CustomAuthenticationFailureHandler("/login-fail")));
         );
 
@@ -88,9 +93,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationManagerBuilder authenticationManagerBuilder) throws
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws
             Exception {
-
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(
+                AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider);
         return authenticationManagerBuilder.build();
     }
@@ -101,7 +107,7 @@ public class WebSecurityConfig {
 
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(
                 authenticationManager); // provider 를 새로 설정한 authenticationManager 를 인자로 필터 생성
-        customAuthenticationFilter.setFilterProcessesUrl("/redis/login-process"); // 필터를 적용할 url
+        customAuthenticationFilter.setFilterProcessesUrl("/redis/v1/login-process"); // 필터를 적용할 url
         customAuthenticationFilter.setAuthenticationSuccessHandler(
                 customLoginSuccessHandler); // CustomAuthenticationFilter 를 통해 인증에 성공했을 때 적용할 SuccessHandler
         customAuthenticationFilter.setAuthenticationFailureHandler(

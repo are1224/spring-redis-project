@@ -1,8 +1,10 @@
 package org.study.redis.service.jpa.impl;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.study.redis.domain.RequestUserDto;
 import org.study.redis.domain.User;
 import org.study.redis.domain.entity.UserEntity;
 import org.study.redis.repository.UserRepository;
@@ -16,8 +18,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     /**
@@ -34,5 +39,20 @@ public class UserServiceImpl implements UserService {
                 .userId(findUserEntity.getId())
                 .password(findUserEntity.getPassword())
                 .build();
+    }
+
+    /**
+     *
+     * @param userDto
+     */
+    @Transactional(transactionManager = "mysqlJpaTransactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public void registerUser(RequestUserDto userDto) {
+
+        userRepository.registerUser(UserEntity.builder()
+                .id(userDto.getUserId())
+                .name(userDto.getUserName())
+                .password(bCryptPasswordEncoder.encode(userDto.getPassword()))
+                .build());
     }
 }

@@ -24,6 +24,6 @@ public class CustomLoginFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
-        response.sendRedirect("/redis/v1/login-fail");
+        response.sendRedirect("/redis/v1/failure");
     }
 }

@@ -26,4 +26,7 @@ public class UserRepository {
         return entityManager.find(UserEntity.class, user.getUserId());
     }
 
+    public void registerUser(UserEntity userEntity) {
+        entityManager.persist(userEntity);
+    }
 }
