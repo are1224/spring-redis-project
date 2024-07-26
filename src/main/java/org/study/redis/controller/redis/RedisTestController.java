@@ -8,13 +8,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.study.redis.domain.RequestUserDto;
 import org.study.redis.domain.User;
 import org.study.redis.service.jpa.UserService;
-import org.study.redis.service.redis.RedisService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/redis/v1")
 public class RedisTestController {
 
-    private final RedisService redisService;
+    // private final RedisService redisService;
 
     private final UserService userService;
 
@@ -85,21 +83,22 @@ public class RedisTestController {
     //
     // }
 
-    @GetMapping(value = "/findUser")
-    public ResponseEntity<User> findUser(@RequestHeader("session-key") String sessionKey) throws Exception {
-
-        User findUser = redisService.getValues(sessionKey, User.class);
-
-        if (findUser != null) {
-            log.info(findUser.toString());
-        }
-
-        return new ResponseEntity<User>(findUser, HttpStatus.OK);
-    }
+    // @GetMapping(value = "/findUser")
+    // public ResponseEntity<User> findUser(@RequestHeader("session-key") String sessionKey) throws Exception {
+    //
+    //     User findUser = redisService.getValues(sessionKey, User.class);
+    //
+    //     if (findUser != null) {
+    //         log.info(findUser.toString());
+    //     }
+    //
+    //     return new ResponseEntity<User>(findUser, HttpStatus.OK);
+    // }
 
     @GetMapping(value = "/findTest")
     public String findTest(HttpServletRequest httpRequest) throws Exception {
 
+        log.info("test test test test test");
         return "/signUp";
 
     }
@@ -116,7 +115,7 @@ public class RedisTestController {
         return "/success";
     }
 
-    @GetMapping(value = "/signup")
+    @GetMapping(value = "/signUp")
     public String signup() {
         return "/signUp";
     }

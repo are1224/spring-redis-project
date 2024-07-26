@@ -35,10 +35,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity findUserEntity = userRepository.findUser(user);
 
-        return User.builder()
-                .userId(findUserEntity.getId())
-                .password(findUserEntity.getPassword())
-                .build();
+        return new User(findUserEntity.getId(), findUserEntity.getPassword(), "USER");
     }
 
     /**

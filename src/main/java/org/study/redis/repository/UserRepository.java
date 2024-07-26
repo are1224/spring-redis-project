@@ -23,7 +23,7 @@ public class UserRepository {
     }
 
     public UserEntity findUser(User user) {
-        return entityManager.find(UserEntity.class, user.getUserId());
+        return entityManager.find(UserEntity.class, user.getUsername());
     }
 
     public void registerUser(UserEntity userEntity) {
