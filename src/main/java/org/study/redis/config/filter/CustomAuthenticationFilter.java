@@ -1,33 +1,70 @@
 package org.study.redis.config.filter;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import java.io.IOException;
 
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.study.redis.service.redis.RedisService;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
-public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+@Slf4j
+public class CustomAuthenticationFilter implements Filter {
 
-    public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
-        super.setAuthenticationManager(authenticationManager);
+    private final RedisService redisService;
+
+    public CustomAuthenticationFilter(RedisService redisService) {
+        this.redisService = redisService;
     }
 
+    /**
+     *
+     * @param servletRequest
+     * @param servletResponse
+     * @param filterChain
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
-            AuthenticationException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws
+            IOException,
+            ServletException {
 
-        // Authentication 구현체 (검증전)
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
-                request.getParameter("userId"), request.getParameter("userPw"));
+        // 이미 인증 처리된 건은 이 이상 진행할 필요가 없음
+        if (SecurityContextHolder.getContext() != null &&
+                SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 
-        setDetails(request, authRequest);
+            doFilter(servletRequest, servletResponse, filterChain);
+            return;
+        }
 
-        // provider 로 절차가 넘기기 (ProviderManager 의 loop 내에서 AuthenticationProvider 를 조회하며 authenticate 처리)
-        return this.getAuthenticationManager().authenticate(authRequest);
+        // session id 는 ServletRequest 가 아닌 HttpServletRequest 에 있다.
+        String sessionId = ((HttpServletRequest)servletRequest).getSession().getId();
+
+        // Redis 에 세션 아이디에 해당하는 SecurityContext 가 있는지 확인
+        SecurityContext securityContext = redisService.getValues(sessionId, SecurityContext.class);
+
+        // 이전에 인증 처리했던 SecurityContext 를
+        if (SecurityContextHolder.getContext() != null && securityContext != null) {
+            SecurityContextHolder.getContext().setAuthentication(securityContext.getAuthentication());
+        } else {
+
+            if (securityContext != null) {
+                SecurityContextHolder.setContext(securityContext);
+            } else {
+                log.info("Redis 에 보관 중이던 SecurityContext 를 설정하는 중 문제 있음!!");
+            }
+
+        }
+
+        doFilter(servletRequest, servletResponse, filterChain);
 
     }
-
 }

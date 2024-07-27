@@ -17,6 +17,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.study.redis.config.handler.CustomLoginFailureHandler;
 import org.study.redis.config.handler.CustomLoginSuccessHandler;
 import org.study.redis.config.provider.CustomAuthenticationProvider;
+import org.study.redis.service.redis.RedisService;
 
 @Configuration
 @EnableWebSecurity
@@ -28,13 +29,17 @@ public class WebSecurityConfig {
 
     private final CustomLoginFailureHandler customLoginFailureHandler;
 
+    private final RedisService redisService;
+
     public WebSecurityConfig(
             CustomAuthenticationProvider customAuthenticationProvider,
             CustomLoginSuccessHandler customLoginSuccessHandler,
-            CustomLoginFailureHandler customLoginFailureHandler) {
+            CustomLoginFailureHandler customLoginFailureHandler,
+            RedisService redisService) {
         this.customAuthenticationProvider = customAuthenticationProvider;
         this.customLoginSuccessHandler = customLoginSuccessHandler;
         this.customLoginFailureHandler = customLoginFailureHandler;
+        this.redisService = redisService;
     }
 
     /**
@@ -60,6 +65,7 @@ public class WebSecurityConfig {
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setMatchingRequestParameterName(null);
 
+        // http basic
         http.httpBasic(HttpBasicConfigurer::disable);
 
         // 사이트 위변조 요청 방지
@@ -67,12 +73,9 @@ public class WebSecurityConfig {
 
         // session 설정
         http.sessionManagement(configurer -> {
-            // configurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-            configurer.maximumSessions(1);
+            configurer.maximumSessions(1).maxSessionsPreventsLogin(false);
+            //configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS); 이 기능을 활성화시 매 요청마다 Session 이 갱신되게 된다.
         });
-
-        // authentication Manager 설정
-        // AuthenticationManager authenticationManager = authenticationManager(http);
 
         // 인증 (접근권한) 설정
         http.authorizeHttpRequests(
@@ -97,18 +100,12 @@ public class WebSecurityConfig {
         http.authenticationProvider(customAuthenticationProvider);
 
         // filter 설정 ( 어차피 로그인 처리 자체가 UsernamePasswordAuthenticationFilter 에서 이뤄지므로 나중에 Redis 관련 필터를  UsernamePasswordAuthenticationFilter 앞에 추가해야한다. )
-        // http.addFilterAfter(customAuthenticationFilter(authenticationManager),
+        // http.addFilterAfter(customAuthenticationFilter(redisService),
         //         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 
     }
-
-    // @Bean
-    // public AuthenticationManager authenticationManager(CustomAuthenticationProvider customAuthenticationProvider) throws
-    //         Exception {
-    //     return new ProviderManager(Collections.singletonList(customAuthenticationProvider));
-    // }
 
     /*
      *  authentication manager 에 customAuthenticationProvider 추가
@@ -122,21 +119,14 @@ public class WebSecurityConfig {
         return authenticationManager;
     }
 
+    /*
+     * Redis Authentication 필터
+     * 이미 로그인한 유저에 대해서는 다시 인증 처리할 필요 없게 SecurityContext 를 Redis 에서 꺼내와서 사용
+     * */
     // @Bean
-    // public CustomAuthenticationFilter customAuthenticationFilter(AuthenticationManager authenticationManager) throws
+    // public CustomAuthenticationFilter customAuthenticationFilter(RedisService redisService) throws
     //         Exception {
-    //
-    //     CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(
-    //             authenticationManager); // provider 를 새로 설정한 authenticationManager 를 인자로 필터 생성
-    //     customAuthenticationFilter.setFilterProcessesUrl("/redis/v1/login-process"); // 필터를 적용할 url
-    //     customAuthenticationFilter.setAuthenticationSuccessHandler(
-    //             customLoginSuccessHandler); // CustomAuthenticationFilter 를 통해 인증에 성공했을 때 적용할 SuccessHandler
-    //     customAuthenticationFilter.setAuthenticationFailureHandler(
-    //             customLoginFailureHandler); // CustomAuthenticationFilter 를 통해 인증에 실패했을 때 적용할 FailureHandler
-    //     customAuthenticationFilter.afterPropertiesSet();
-    //
-    //     return customAuthenticationFilter;
-    //
+    //     return new CustomAuthenticationFilter(redisService); // provider 를 새로 설정한 authenticationManager 를 인자로 필터 생성
     // }
 
 }

@@ -47,12 +47,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException(findUser.getUsername() + "Invalid password");
         }
 
-        // List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-        // // Add additional grant/authority
-        // authorities.add(new SimpleGrantedAuthority("USER"));
-
-        // findUser.setAuthorities(authorities);
-
         // 인자가 3개인 authentication 의 Authenticated 를 true 로 설정하네...
         return new UsernamePasswordAuthenticationToken(findUser, null, findUser.getAuthorities());
     }

@@ -1,17 +1,18 @@
 package org.study.redis.service.redis;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.study.redis.domain.User;
-
+import java.time.Duration;
 import java.util.Map;
 
-import java.time.Duration;
+import org.springframework.security.core.context.SecurityContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface RedisService {
 
-    public String setValues(String sessionKey, User user) throws JsonProcessingException;
+    public String setValues(String sessionKey, SecurityContext securityContext) throws JsonProcessingException;
 
-    public String setValues(String sessionKey, User user, Duration duration) throws JsonProcessingException;
+    public String setValues(String sessionKey, SecurityContext securityContext, Duration duration) throws
+            JsonProcessingException;
 
     public <T> T getValues(String key, Class<T> resultClassType) throws JsonProcessingException;
 

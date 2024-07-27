@@ -10,6 +10,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
+import org.study.redis.service.redis.RedisService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    private final RedisService redisService;
+
+    public CustomLoginSuccessHandler(RedisService redisService) {
+        this.redisService = redisService;
+    }
 
     /**
      *
@@ -47,7 +54,8 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        // SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Redis 에 인증 처리된 SecurityContext 저장
+        // redisService.setValues(request.getSession().getId(), securityContext);
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             log.info("security context is null");
