@@ -15,8 +15,5 @@ spring:
     session:
       cookie:
         name: JSESSIONID
-  session:
-    redis:
-      expiration: 600
 server:
   port: 9000

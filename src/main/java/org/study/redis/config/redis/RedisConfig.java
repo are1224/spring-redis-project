@@ -1,8 +1,5 @@
 package org.study.redis.config.redis;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -11,7 +8,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
-import org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration;
 import org.study.redis.common.properties.RedisServerProperties;
 
 import lombok.RequiredArgsConstructor;
@@ -19,13 +15,14 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 @EnableRedisRepositories // redis 를 사용한다고 명시해주는 annotation
-@EnableRedisHttpSession // web application 에 대한 session 저장소로 redis 를 사용하게 설정
+@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 600)
+// web application 에 대한 session 저장소로 redis 를 사용하게 설정 / maxInactiveIntervalInSeconds 을 통해 session time out 설정 가능 (10분 으로 설정)
 public class RedisConfig {
 
     /* redis server properties */
     private final RedisServerProperties redisServerProperties;
 
-    private final long REDIS_SESSION_EXPIARED = 60000;
+    // private final long REDIS_SESSION_EXPIARED = 60000;
 
     /*
      * redisServerProperties 로 application.yml 에 저장한 host, port 를 연결
@@ -62,13 +59,13 @@ public class RedisConfig {
 
     }
 
-    @Bean
-    public RedisHttpSessionConfiguration redisHttpSessionConfiguration() {
-        RedisHttpSessionConfiguration config = new RedisHttpSessionConfiguration();
-        // 세션 타임아웃을 30분으로 설정
-        config.setMaxInactiveInterval(
-                Duration.of(REDIS_SESSION_EXPIARED, TimeUnit.MILLISECONDS.toChronoUnit()));
-        return config;
-    }
+    // @Bean
+    // public RedisHttpSessionConfiguration redisHttpSessionConfiguration() {
+    //     RedisHttpSessionConfiguration config = new RedisHttpSessionConfiguration();
+    //     // 세션 타임아웃을 30분으로 설정
+    //     config.setMaxInactiveInterval(
+    //             Duration.of(REDIS_SESSION_EXPIARED, TimeUnit.MILLISECONDS.toChronoUnit()));
+    //     return config;
+    // }
 
 }
