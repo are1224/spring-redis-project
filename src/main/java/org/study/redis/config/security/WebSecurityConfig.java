@@ -3,9 +3,6 @@ package org.study.redis.config.security;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,7 +12,6 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.study.redis.config.handler.CustomLoginFailureHandler;
-import org.study.redis.config.handler.CustomLoginSuccessHandler;
 import org.study.redis.config.provider.CustomAuthenticationProvider;
 import org.study.redis.service.redis.RedisService;
 
@@ -25,19 +21,15 @@ public class WebSecurityConfig {
 
     private final CustomAuthenticationProvider customAuthenticationProvider;
 
-    private final CustomLoginSuccessHandler customLoginSuccessHandler;
-
     private final CustomLoginFailureHandler customLoginFailureHandler;
 
     private final RedisService redisService;
 
     public WebSecurityConfig(
             CustomAuthenticationProvider customAuthenticationProvider,
-            CustomLoginSuccessHandler customLoginSuccessHandler,
             CustomLoginFailureHandler customLoginFailureHandler,
             RedisService redisService) {
         this.customAuthenticationProvider = customAuthenticationProvider;
-        this.customLoginSuccessHandler = customLoginSuccessHandler;
         this.customLoginFailureHandler = customLoginFailureHandler;
         this.redisService = redisService;
     }
@@ -79,10 +71,12 @@ public class WebSecurityConfig {
 
         // 인증 (접근권한) 설정
         http.authorizeHttpRequests(
-                (authorizeRequests) -> authorizeRequests.requestMatchers("/redis/v1/findTest")
-                        .authenticated()
-                        .anyRequest()
-                        .permitAll()
+                (authorizeRequests) ->
+                        authorizeRequests.requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui-custom.html",
+                                        "/templates/thymeleaf/**", "/error")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
         );
 
         // requestCache 설정
@@ -91,7 +85,7 @@ public class WebSecurityConfig {
         // 로그인 설정
         http.formLogin(form -> form.loginPage("/redis/v1/login") // 로그인 페이지 (get)
                 .loginProcessingUrl("/redis/v1/login") // 로그인 처리 url (post)
-                .successHandler(customLoginSuccessHandler) // provider 를 통해서 인증에 성공한 경우 처리 handler
+                //.successHandler(customLoginSuccessHandler()) // @EnableRedisHttpSession 싹다 알아서 해줌 (처음 요청한 url 로 리다이렉트 처리 및 security context 관련 처리해줌
                 .failureHandler(customLoginFailureHandler) // provider 를 통해서 인증에 실패한 경우 처리 handler
                 .defaultSuccessUrl("/redis/v1/success")
                 .permitAll());
@@ -99,34 +93,13 @@ public class WebSecurityConfig {
         // Custom AuthenticationManager 설정
         http.authenticationProvider(customAuthenticationProvider);
 
-        // filter 설정 ( 어차피 로그인 처리 자체가 UsernamePasswordAuthenticationFilter 에서 이뤄지므로 나중에 Redis 관련 필터를  UsernamePasswordAuthenticationFilter 앞에 추가해야한다. )
-        // http.addFilterAfter(customAuthenticationFilter(redisService),
-        //         UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
 
     }
 
-    /*
-     *  authentication manager 에 customAuthenticationProvider 추가
-     * */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
-            Exception {
-        ProviderManager authenticationManager = (ProviderManager)authenticationConfiguration.getAuthenticationManager(); // AuthenticationManager 생성
-        authenticationManager.getProviders()
-                .add(customAuthenticationProvider); // AuthenticationManager에 CustomAuthenticationProvider 등록
-        return authenticationManager;
-    }
-
-    /*
-     * Redis Authentication 필터
-     * 이미 로그인한 유저에 대해서는 다시 인증 처리할 필요 없게 SecurityContext 를 Redis 에서 꺼내와서 사용
-     * */
     // @Bean
-    // public CustomAuthenticationFilter customAuthenticationFilter(RedisService redisService) throws
-    //         Exception {
-    //     return new CustomAuthenticationFilter(redisService); // provider 를 새로 설정한 authenticationManager 를 인자로 필터 생성
+    // public CustomLoginSuccessHandler customLoginSuccessHandler() {
+    //     return new CustomLoginSuccessHandler();
     // }
 
 }
