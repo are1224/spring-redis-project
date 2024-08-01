@@ -8,4 +8,6 @@ public interface UserService {
     public User findUser(User user);
 
     void registerUser(RequestUserDto userDto);
+
+    User findUserByUserId(String userId);
 }

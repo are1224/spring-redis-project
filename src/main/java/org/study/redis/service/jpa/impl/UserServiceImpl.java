@@ -52,4 +52,17 @@ public class UserServiceImpl implements UserService {
                 .password(bCryptPasswordEncoder.encode(userDto.getPassword()))
                 .build());
     }
+
+    /**
+     * @param userId
+     * @return
+     */
+    @Transactional(transactionManager = "mysqlJpaTransactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public User findUserByUserId(String userId) {
+
+        UserEntity findUserEntity = userRepository.findUser(new User(userId, null));
+
+        return new User(findUserEntity.getId(), findUserEntity.getPassword(), "USER");
+    }
 }

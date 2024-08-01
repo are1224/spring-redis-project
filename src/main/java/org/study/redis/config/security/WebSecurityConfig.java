@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.study.redis.config.handler.CustomLoginFailureHandler;
+import org.study.redis.config.handler.CustomLoginSuccessHandler;
 import org.study.redis.config.provider.CustomAuthenticationProvider;
 import org.study.redis.service.redis.RedisService;
 
@@ -23,15 +24,16 @@ public class WebSecurityConfig {
 
     private final CustomLoginFailureHandler customLoginFailureHandler;
 
-    private final RedisService redisService;
+    private final CustomLoginSuccessHandler customLoginSuccessHandler;
 
     public WebSecurityConfig(
             CustomAuthenticationProvider customAuthenticationProvider,
+            CustomLoginSuccessHandler customLoginSuccessHandler,
             CustomLoginFailureHandler customLoginFailureHandler,
             RedisService redisService) {
         this.customAuthenticationProvider = customAuthenticationProvider;
+        this.customLoginSuccessHandler = customLoginSuccessHandler;
         this.customLoginFailureHandler = customLoginFailureHandler;
-        this.redisService = redisService;
     }
 
     /**
@@ -66,40 +68,46 @@ public class WebSecurityConfig {
         // session 설정
         http.sessionManagement(configurer -> {
             configurer.maximumSessions(1).maxSessionsPreventsLogin(false);
-            //configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS); 이 기능을 활성화시 매 요청마다 Session 이 갱신되게 된다.
         });
 
         // 인증 (접근권한) 설정
         http.authorizeHttpRequests(
                 (authorizeRequests) ->
                         authorizeRequests.requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui-custom.html",
-                                        "/templates/thymeleaf/**", "/error")
+                                        "/templates/thymeleaf/**", "/error", "/redis/v1/login")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
         );
+
+        // http.authorizeHttpRequests(
+        //         (authorizeRequests) ->
+        //                 authorizeRequests.requestMatchers("/redis/v1/findTest")
+        //                         .authenticated()
+        //                         .anyRequest()
+        //                         .permitAll()
+        // );
 
         // requestCache 설정
         http.requestCache(request -> request.requestCache(requestCache));
 
         // 로그인 설정
         http.formLogin(form -> form.loginPage("/redis/v1/login") // 로그인 페이지 (get)
-                .loginProcessingUrl("/redis/v1/login") // 로그인 처리 url (post)
-                //.successHandler(customLoginSuccessHandler()) // @EnableRedisHttpSession 싹다 알아서 해줌 (처음 요청한 url 로 리다이렉트 처리 및 security context 관련 처리해줌
+                .loginProcessingUrl("/redis/v1/login")
+                .defaultSuccessUrl("/redis/v1/success")// 로그인 처리 url (post)
+                // .successHandler(
+                //         customLoginSuccessHandler) // @EnableRedisHttpSession 싹다 알아서 해줌 (처음 요청한 url 로 리다이렉트 처리 및 security context 관련 처리해줌
                 .failureHandler(customLoginFailureHandler) // provider 를 통해서 인증에 실패한 경우 처리 handler
-                .defaultSuccessUrl("/redis/v1/success")
                 .permitAll());
 
         // Custom AuthenticationManager 설정
         http.authenticationProvider(customAuthenticationProvider);
 
+        // UsernamePasswordAuthenticationFilter
+        // SpringSessionRepositoryFilter
+
         return http.build();
 
     }
-
-    // @Bean
-    // public CustomLoginSuccessHandler customLoginSuccessHandler() {
-    //     return new CustomLoginSuccessHandler();
-    // }
 
 }

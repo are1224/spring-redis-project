@@ -23,7 +23,7 @@ public class SwaggerConfig {
         // /redis/v1/ 로 시작하는 API 들을 테스트 관련 API 로 그룹핑
 
         String[] paths = {"/redis/v1/**"};
-        String[] packageToScan = {"org.study.redis.swagger"};
+        String[] packageToScan = {"org.study.redis.controller.redis"};
 
         return GroupedOpenApi.builder().group("springdoc-openapi")
                 .pathsToMatch(paths)

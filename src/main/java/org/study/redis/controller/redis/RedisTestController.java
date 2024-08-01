@@ -14,6 +14,10 @@ import org.study.redis.domain.RequestUserDto;
 import org.study.redis.domain.User;
 import org.study.redis.service.jpa.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -83,17 +87,25 @@ public class RedisTestController {
     //
     // }
 
-    // @GetMapping(value = "/findUser")
-    // public ResponseEntity<User> findUser(@RequestHeader("session-key") String sessionKey) throws Exception {
-    //
-    //     User findUser = redisService.getValues(sessionKey, User.class);
-    //
-    //     if (findUser != null) {
-    //         log.info(findUser.toString());
-    //     }
-    //
-    //     return new ResponseEntity<User>(findUser, HttpStatus.OK);
-    // }
+    @GetMapping(value = "/findUser")
+    @Operation
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저 정보 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "유저 정보 조회 실패")
+    })
+    public ResponseEntity<User> findUser(@Parameter(description = "user id") @RequestParam String userId) throws
+            Exception {
+
+        // User findUser = redisService.getValues(sessionKey, User.class);
+
+        User findUser = userService.findUserByUserId(userId);
+
+        if (findUser != null) {
+            log.info(findUser.toString());
+        }
+
+        return new ResponseEntity<User>(findUser, HttpStatus.OK);
+    }
 
     @GetMapping(value = "/findTest")
     public String findTest(HttpServletRequest httpRequest) throws Exception {

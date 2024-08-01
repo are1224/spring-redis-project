@@ -3,7 +3,8 @@ package org.study.redis.config.handler;
 import java.io.IOException;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,9 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Component
 @NoArgsConstructor
 @Slf4j
-public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     /**
      *
@@ -60,6 +62,8 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         //
         // log.info("리다이렉트 ~ : {}", targetUrl);
         // getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        log.info("testtestset");
+        response.sendRedirect("/redis/v1/success");
     }
 
 }

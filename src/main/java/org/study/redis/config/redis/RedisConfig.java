@@ -6,6 +6,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.study.redis.common.properties.RedisServerProperties;
@@ -50,7 +51,7 @@ public class RedisConfig {
 
         /* Key-Value 형태롤 직렬화를 수행 : 이외의 직렬화가 늘어나면 setDefaultSerializer 를 통해서 기본적인 직렬화를 설정해줘야함 */
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
         /* Redis 를 연결 */
         redisTemplate.setConnectionFactory(redisConnectionFactory());
@@ -58,14 +59,5 @@ public class RedisConfig {
         return redisTemplate;
 
     }
-
-    // @Bean
-    // public RedisHttpSessionConfiguration redisHttpSessionConfiguration() {
-    //     RedisHttpSessionConfiguration config = new RedisHttpSessionConfiguration();
-    //     // 세션 타임아웃을 30분으로 설정
-    //     config.setMaxInactiveInterval(
-    //             Duration.of(REDIS_SESSION_EXPIARED, TimeUnit.MILLISECONDS.toChronoUnit()));
-    //     return config;
-    // }
 
 }
