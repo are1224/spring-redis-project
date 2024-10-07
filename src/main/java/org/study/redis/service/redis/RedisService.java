@@ -14,7 +14,9 @@ public interface RedisService {
     public String setValues(String sessionKey, SecurityContext securityContext, Duration duration) throws
             JsonProcessingException;
 
-    public <T> T getValues(String key, Class<T> resultClassType) throws JsonProcessingException;
+    public <T> T getValues(String sessionKey, Class<T> resultClassType) throws JsonProcessingException;
+
+    public Object getValuesForHash(String sessionKey, String hashKey) throws JsonProcessingException;
 
     public void deleteValues(String key);
 

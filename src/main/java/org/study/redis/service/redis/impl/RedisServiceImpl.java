@@ -110,6 +110,28 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
+     * key 를 이용해서 redis 로 부터 값을 get
+     *
+     * @param sessionKey
+     * @param hashKey
+     * @return
+     */
+    @Transactional(readOnly = true)
+    @Override
+    public Object getValuesForHash(String sessionKey, String hashKey) throws
+            JsonProcessingException {
+
+        HashOperations<String, String, Object> hashOperations = redisTemplate.opsForHash();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(SESSION_KEY_PREFIX);
+        sb.append(sessionKey);
+
+        return hashOperations.get(sb.toString(), hashKey);
+
+    }
+
+    /**
      * @param key
      */
     @Override

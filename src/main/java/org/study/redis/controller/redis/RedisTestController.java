@@ -2,6 +2,7 @@ package org.study.redis.controller.redis;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.study.redis.domain.RequestUserDto;
 import org.study.redis.domain.User;
+import org.study.redis.domain.kafka.message.KafkaDefaultMessage;
 import org.study.redis.service.jpa.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +36,8 @@ public class RedisTestController {
     private final UserService userService;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final KafkaTemplate<String, KafkaDefaultMessage> kafkaTemplate;
 
     @PostMapping(value = "/saveUser")
     public ResponseEntity saveUser(@Nullable @RequestBody User user) throws Exception {
@@ -111,7 +115,13 @@ public class RedisTestController {
     public String findTest(HttpServletRequest httpRequest) throws Exception {
 
         log.info("test test test test test");
-        return "/signUp";
+
+        kafkaTemplate.send("mytopic", KafkaDefaultMessage.builder()
+                .messageName("producer retest message!")
+                .messageContent("hi this is kafka retest, hello kafka world!")
+                .build());
+
+        return "/test";
 
     }
 

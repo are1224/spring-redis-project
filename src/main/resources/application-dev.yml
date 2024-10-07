@@ -34,3 +34,9 @@ springdoc:
   cache:
     disabled: true
   model-and-view-allowed: true
+
+kafka:
+  bootstrap-servers: 192.168.70.128:9094
+  acks: 1
+  key-serializer: org.apache.kafka.common.serialization.StringSerializer
+  value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

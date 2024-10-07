@@ -9,6 +9,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.study.redis.common.properties.RedisServerProperties;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,8 @@ public class RedisConfig {
     /* redis server properties */
     private final RedisServerProperties redisServerProperties;
 
-    // private final long REDIS_SESSION_EXPIARED = 60000;
+    // 쿠키내 세션 관련 attribute 명 변경
+    private static final String SESSION_NAME = "SESSIONS";
 
     /*
      * redisServerProperties 로 application.yml 에 저장한 host, port 를 연결
@@ -49,14 +51,34 @@ public class RedisConfig {
 
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 
+        /* Redis 를 연결 */
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+
         /* Key-Value 형태롤 직렬화를 수행 : 이외의 직렬화가 늘어나면 setDefaultSerializer 를 통해서 기본적인 직렬화를 설정해줘야함 */
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-        /* Redis 를 연결 */
-        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        /* hash 관련 */
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+
+        redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
+
+    }
+
+    @Bean
+    public DefaultCookieSerializer getDefaultCookieSerializer() {
+
+        DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+
+        cookieSerializer.setDomainName("localhost");
+        cookieSerializer.setCookieName(SESSION_NAME);
+        cookieSerializer.setCookiePath("/");
+        cookieSerializer.setUseBase64Encoding(false);
+        cookieSerializer.setSameSite(null);
+
+        return cookieSerializer;
 
     }
 

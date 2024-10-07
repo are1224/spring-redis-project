@@ -10,11 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.study.redis.config.filter.RedisAuthenticationFilter;
 import org.study.redis.config.handler.CustomLoginFailureHandler;
-import org.study.redis.config.handler.CustomLoginSuccessHandler;
 import org.study.redis.config.provider.CustomAuthenticationProvider;
-import org.study.redis.service.redis.RedisService;
 
 @Configuration
 @EnableWebSecurity
@@ -24,15 +24,14 @@ public class WebSecurityConfig {
 
     private final CustomLoginFailureHandler customLoginFailureHandler;
 
-    private final CustomLoginSuccessHandler customLoginSuccessHandler;
+    private final RedisAuthenticationFilter redisAuthenticationFilter;
 
     public WebSecurityConfig(
             CustomAuthenticationProvider customAuthenticationProvider,
-            CustomLoginSuccessHandler customLoginSuccessHandler,
-            CustomLoginFailureHandler customLoginFailureHandler,
-            RedisService redisService) {
+            RedisAuthenticationFilter redisAuthenticationFilter,
+            CustomLoginFailureHandler customLoginFailureHandler) {
         this.customAuthenticationProvider = customAuthenticationProvider;
-        this.customLoginSuccessHandler = customLoginSuccessHandler;
+        this.redisAuthenticationFilter = redisAuthenticationFilter;
         this.customLoginFailureHandler = customLoginFailureHandler;
     }
 
@@ -102,6 +101,8 @@ public class WebSecurityConfig {
 
         // Custom AuthenticationManager 설정
         http.authenticationProvider(customAuthenticationProvider);
+
+        http.addFilterBefore(redisAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // UsernamePasswordAuthenticationFilter
         // SpringSessionRepositoryFilter
