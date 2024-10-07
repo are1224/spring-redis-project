@@ -11,6 +11,7 @@ import lombok.Getter;
 public class KafkaProperties {
 
     private String bootstrapServers;
+    private Integer acks;
     private String keySerializer;
     private String valueSerializer;
 

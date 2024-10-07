@@ -4,17 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.study.redis.common.properties.KafkaProperties;
-import org.study.redis.domain.kafka.message.KafkaDefaultMessage;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
+@Slf4j
 public class KafkaProducerConfig {
 
     private final KafkaProperties kafkaProperties;
@@ -24,20 +24,25 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, KafkaDefaultMessage> producerFactory() {
+    public ProducerFactory<String, String> producerFactory() {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        try {
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+            props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, Class.forName(kafkaProperties.getKeySerializer()));
+            props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                    Class.forName(kafkaProperties.getValueSerializer()));
+        } catch (ClassNotFoundException classNotFoundException) {
+            log.error(classNotFoundException.getMessage(), classNotFoundException);
+        }
 
         return new DefaultKafkaProducerFactory<>(props);
 
     }
 
     @Bean
-    public KafkaTemplate<String, KafkaDefaultMessage> kafkaTemplate() {
+    public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
