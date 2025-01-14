@@ -5,13 +5,12 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootApplication
+//@SpringBootApplication
 @Slf4j
 public class SpringProducerApplication implements CommandLineRunner {
 
