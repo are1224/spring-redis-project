@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: redis
+  profiles:
+    active: ${profile:dev}
+

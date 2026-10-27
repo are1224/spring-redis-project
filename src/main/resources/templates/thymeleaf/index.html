@@ -1,0 +1,57 @@
+<!-- login page -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Favorite color select webpage</title>
+    <link rel="stylesheet" href="/templates/thymeleaf/css/mainStyle.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="container">
+
+        <h1> 이름을 입력하세요. </h1>
+        <label th:for="user_name">Name:</label>
+        <input type="text" name="user_name" placeholder="아이디를 입력해주세요">
+
+        <h1> 마음에 드는 색상을 고르세요. </h1>
+
+        <ul>
+            <li>
+                <button type="button" onclick="selectedColor('red')">red</button>
+            </li>
+            <li>
+                <button type="button" onclick="selectedColor('yellow')">yellow</button>
+            </li>
+            <li>
+                <button type="button" onclick="selectedColor('green')">green</button>
+            </li>
+            <li>
+                <button type="button" onclick="selectedColor('blue')">blue</button>
+            </li>
+        </ul>
+
+        <br/>
+    </div>
+</th:block>
+
+<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script th:inline="javascript">
+
+    function selectedColor(color_name) {
+
+        if ($("#user_name").val().length == 0) {
+            alert("이름을 입력하세요");
+        } else {
+            var url = 'http://localhost:9000/api/select?color=' + color_name + '&user=' + $("#user_name").val();
+            $.get(url);
+        }
+
+    }
+
+</script>
+</body>
+</html>
